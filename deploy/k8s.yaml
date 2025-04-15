@@ -17,7 +17,7 @@ spec:
           image: local/my-app:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 8080
+            - containerPort: 8080  # Change if your app uses a different port
 ---
 apiVersion: v1
 kind: Service

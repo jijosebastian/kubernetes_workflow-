@@ -44,8 +44,8 @@ jobs:
         run: kubectl version --client
 
       # Step 8: Apply Kubernetes deployment
-      - name: Apply Kubernetes deployment
-        run: kubectl apply -f deploy/k8s.yaml
+    #  - name: Apply Kubernetes deployment
+     #   run: kubectl apply -f deploy/k8s.yaml
 
       # Step 9: Wait for deployment to become ready
       - name: Wait for deployment to become ready

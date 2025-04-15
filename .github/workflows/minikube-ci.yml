@@ -16,35 +16,42 @@ jobs:
         with:
           fetch-depth: 0  # Ensures full repo checkout
 
-      # Step 2: Verify repo structure
-      - name: List project files
-        run: ls -la && ls -la deploy/
+      # Step 2: List project files for debugging
+      - name: List files in the root directory
+        run: ls -la
+
+      - name: List files in the deploy directory
+        run: ls -la deploy/
 
       # Step 3: Set up Minikube
       - name: Start Minikube
         uses: medyagh/setup-minikube@latest
 
-      # Step 4: Verify Minikube status
+      # Step 4: Set kubectl to use Minikube context
+      - name: Set kubectl to use Minikube context
+        run: kubectl config use-context minikube
+
+      # Step 5: Verify Minikube status
       - name: Check Minikube status
         run: minikube status
 
-      # Step 5: Build Docker image inside Minikube
+      # Step 6: Build Docker image inside Minikube
       - name: Build Docker image with Minikube
         run: minikube image build -t local/my-app:latest .
 
-      # Step 6: Verify kubectl is available
-      - name: Check kubectl
+      # Step 7: Verify kubectl is available
+      - name: Check kubectl version
         run: kubectl version --client
 
-      # Step 7: Deploy app using kubectl
+      # Step 8: Apply Kubernetes deployment
       - name: Apply Kubernetes deployment
         run: kubectl apply -f deploy/k8s.yaml
 
-      # Step 8: Wait for pod to be ready
+      # Step 9: Wait for deployment to become ready
       - name: Wait for deployment to become ready
         run: kubectl wait --for=condition=ready pod -l app=my-app --timeout=90s
 
-      # Step 9: Test service via Minikube
+      # Step 10: Test service via Minikube
       - name: Test service
         run: |
           minikube service list

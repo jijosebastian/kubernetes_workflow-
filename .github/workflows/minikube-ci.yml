@@ -1,33 +1,53 @@
-name: Minikube CI
+name: Minikube Kubernetes CI
 
 on:
   pull_request:
+    branches:
+      - main  # Run on PRs to the main branch
 
 jobs:
-  test-on-minikube:
+  deploy-to-minikube:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository code
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full repo checkout
 
+      # Step 2: Verify repo structure
+      - name: List project files
+        run: ls -la && ls -la deploy/
+
+      # Step 3: Set up Minikube
       - name: Start Minikube
         uses: medyagh/setup-minikube@latest
 
-      - name: Verify Minikube
-        run: kubectl get pods -A
+      # Step 4: Verify Minikube status
+      - name: Check Minikube status
+        run: minikube status
 
-      - name: Build Docker image in Minikube
+      # Step 5: Build Docker image inside Minikube
+      - name: Build Docker image with Minikube
         run: minikube image build -t local/my-app:latest .
 
-      - name: Deploy to Minikube
-        run: |
-          kubectl apply -f deploy/k8s.yaml
-          kubectl wait --for=condition=ready pod -l app=my-app --timeout=90s
+      # Step 6: Verify kubectl is available
+      - name: Check kubectl
+        run: kubectl version --client
 
-      - name: Test App
+      # Step 7: Deploy app using kubectl
+      - name: Apply Kubernetes deployment
+        run: kubectl apply -f deploy/k8s.yaml
+
+      # Step 8: Wait for pod to be ready
+      - name: Wait for deployment to become ready
+        run: kubectl wait --for=condition=ready pod -l app=my-app --timeout=90s
+
+      # Step 9: Test service via Minikube
+      - name: Test service
         run: |
           minikube service list
           SERVICE_URL=$(minikube service my-app-svc --url)
-          echo "Service URL: $SERVICE_URL"
+          echo "🌐 Service is accessible at: $SERVICE_URL"
           curl $SERVICE_URL

@@ -1,5 +1,4 @@
 name: Minikube CI Test
-
 on:
   pull_request:
     branches:
